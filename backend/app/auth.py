@@ -4,6 +4,13 @@ from datetime import datetime, timedelta, timezone
 import bcrypt
 import jwt
 from dotenv import load_dotenv
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.exceptions import AppError
+from app.models import User
 
 load_dotenv()
 
@@ -36,3 +43,30 @@ def decode_access_token(token: str) -> dict | None:
         return jwt.decode(token, JWT_SECRET_KEY, algorithms=[JWT_ALGORITHM])
     except jwt.PyJWTError:
         return None
+
+
+bearer_scheme = HTTPBearer(auto_error=False)
+
+
+def require_auth(
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
+    db: Session = Depends(get_db),
+) -> User:
+    if credentials is None:
+        raise AppError(401, "UNAUTHORIZED", "로그인이 필요합니다")
+
+    payload = decode_access_token(credentials.credentials)
+    if payload is None:
+        raise AppError(401, "UNAUTHORIZED", "로그인이 필요합니다")
+
+    user = db.get(User, payload["user_id"])
+    if user is None:
+        raise AppError(401, "UNAUTHORIZED", "로그인이 필요합니다")
+
+    return user
+
+
+def require_admin(user: User = Depends(require_auth)) -> User:
+    if user.role != "admin":
+        raise AppError(403, "FORBIDDEN", "관리자만 접근할 수 있습니다")
+    return user
