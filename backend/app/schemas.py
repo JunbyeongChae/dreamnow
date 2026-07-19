@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from pydantic.alias_generators import to_camel
 
 from app.models import MenuCategory, MenuSubCategory, UserRole
@@ -10,10 +10,17 @@ class CamelModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
 
 
+def _check_menu_sub_category(category: MenuCategory, sub_category: MenuSubCategory | None) -> None:
+    if category == MenuCategory.beverage and sub_category is None:
+        raise ValueError("음료 카테고리는 하위 카테고리를 선택해주세요")
+    if category != MenuCategory.beverage and sub_category is not None:
+        raise ValueError("season/dessert 카테고리는 하위 카테고리를 가질 수 없습니다")
+
+
 # --- API-01. 회원가입 ---
 class SignupRequest(CamelModel):
     username: str
-    password: str
+    password: str = Field(min_length=8)
 
 
 class SignupResponse(CamelModel):
@@ -81,6 +88,11 @@ class MenuListQuery(CamelModel):
     category: MenuCategory
     sub_category: MenuSubCategory | None = None
 
+    @model_validator(mode="after")
+    def validate_sub_category(self) -> "MenuListQuery":
+        _check_menu_sub_category(self.category, self.sub_category)
+        return self
+
 
 class MenuListItem(CamelModel):
     id: int
@@ -107,6 +119,11 @@ class MenuCreateRequest(CamelModel):
     image_url: str
     price: int
     description: str | None = None
+
+    @model_validator(mode="after")
+    def validate_sub_category(self) -> "MenuCreateRequest":
+        _check_menu_sub_category(self.category, self.sub_category)
+        return self
 
 
 class MenuCreateResponse(CamelModel):
