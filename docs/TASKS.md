@@ -6,20 +6,9 @@
 
 ## 현재 Phase
 
-Phase 0 — 프로젝트 셋업
+Phase 1 — DB 설계
 
 ---
-
-## Phase 0 — 프로젝트 셋업
-
-- [ ] `backend/`, `frontend/` 디렉토리 구조 생성 (TDD 4-1)
-- [ ] `docker-compose.yml` 작성, MySQL 컨테이너 기동 확인 (TDD 9-3)
-- [ ] `backend/.env.example` 작성 — `DATABASE_URL`, `JWT_SECRET_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `CORS_ORIGIN` (TDD 9-2)
-- [ ] `backend/requirements.txt` 작성(FastAPI, SQLAlchemy, Alembic, PyMySQL, bcrypt 등) 및 `pip install`
-- [ ] `frontend` package.json 초기화 (Vite + React + TypeScript)
-- [ ] Tailwind CSS 설치, `tailwind.config.ts`에 05_design 2-2 컬러 토큰 등록
-- [ ] frontend 의존성 설치: zustand, @tanstack/react-query, react-router, tiptap, lucide-react
-- [ ] `backend/app/main.py` 기본 골격 + CORSMiddleware 설정 (TDD 9-1)
 
 ## Phase 1 — DB 설계
 
@@ -101,4 +90,13 @@ Phase 0 — 프로젝트 셋업
 
 ## DONE
 
-(아직 없음)
+### Phase 0 — 프로젝트 셋업
+
+- [x] `backend/`, `frontend/` 디렉토리 구조 생성 (TDD 4-1)
+- [x] `docker-compose.yml` 작성, MySQL 컨테이너 기동 확인 (TDD 9-3) — 로컬 MySQL80(3306) 충돌로 호스트 포트 3307 사용
+- [x] `backend/.env.example` 작성 — `DATABASE_URL`, `JWT_SECRET_KEY`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `CORS_ORIGIN` (TDD 9-2)
+- [x] `backend/requirements.txt` 작성(FastAPI, SQLAlchemy, Alembic, PyMySQL, bcrypt 등) 및 `pip install`
+- [x] `frontend` package.json 초기화 (Vite + React + TypeScript)
+- [x] Tailwind CSS 설치, `tailwind.config.ts`에 05_design 2-2 컬러 토큰 등록
+- [x] frontend 의존성 설치: zustand, @tanstack/react-query, react-router, tiptap, lucide-react
+- [x] `backend/app/main.py` 기본 골격 + CORSMiddleware 설정 (TDD 9-1)
