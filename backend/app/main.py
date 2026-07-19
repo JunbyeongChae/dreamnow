@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import SessionLocal
 from app.exceptions import register_exception_handlers
+from app.routers import auth
 from app.seed import ensure_admin_user
 
 load_dotenv()
@@ -21,6 +22,7 @@ app.add_middleware(
 )
 
 register_exception_handlers(app)
+app.include_router(auth.router)
 
 
 @app.on_event("startup")

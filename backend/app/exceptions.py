@@ -22,6 +22,7 @@ def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(RequestValidationError)
     async def validation_error_handler(request: Request, exc: RequestValidationError):
         message = exc.errors()[0]["msg"] if exc.errors() else "잘못된 요청입니다"
+        message = message.removeprefix("Value error, ")
         return _error_response(400, "INVALID_INPUT", message)
 
     @app.exception_handler(Exception)
