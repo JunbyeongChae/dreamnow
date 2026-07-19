@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 from pydantic.alias_generators import to_camel
 
 from app.models import MenuCategory, MenuSubCategory, UserRole
@@ -20,7 +20,14 @@ def _check_menu_sub_category(category: MenuCategory, sub_category: MenuSubCatego
 # --- API-01. 회원가입 ---
 class SignupRequest(CamelModel):
     username: str
-    password: str = Field(min_length=8)
+    password: str
+
+    @field_validator("password")
+    @classmethod
+    def validate_password_length(cls, value: str) -> str:
+        if len(value) < 8:
+            raise ValueError("비밀번호는 8자 이상이어야 합니다")
+        return value
 
 
 class SignupResponse(CamelModel):
