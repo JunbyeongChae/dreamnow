@@ -52,6 +52,11 @@ class LoginResponse(CamelModel):
     user: LoginUser
 
 
+# --- 이미지 업로드 ---
+class UploadResponse(CamelModel):
+    image_url: str
+
+
 # --- API-03/04. 배너 ---
 class BannerResponse(CamelModel):
     id: int
