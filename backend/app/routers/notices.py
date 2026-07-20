@@ -6,7 +6,14 @@ from app.auth import require_admin
 from app.database import get_db
 from app.exceptions import AppError
 from app.models import Notice, User
-from app.schemas import NoticeCreateRequest, NoticeCreateResponse, NoticeDetailResponse, NoticeListItem, NoticeListResponse
+from app.schemas import (
+    NoticeCreateRequest,
+    NoticeCreateResponse,
+    NoticeDetailResponse,
+    NoticeListItem,
+    NoticeListResponse,
+    NoticeUpdateRequest,
+)
 
 router = APIRouter(prefix="/api/notices", tags=["notices"])
 
@@ -60,3 +67,42 @@ def create_notice(body: NoticeCreateRequest, db: Session = Depends(get_db), admi
     db.refresh(notice)
 
     return {"success": True, "data": NoticeCreateResponse.model_validate(notice).model_dump(by_alias=True)}
+
+
+@router.patch("/{notice_id}")
+def update_notice(
+    notice_id: int,
+    body: NoticeUpdateRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    notice = db.get(Notice, notice_id)
+    if notice is None:
+        raise AppError(404, "NOTICE_NOT_FOUND", "존재하지 않는 공지사항입니다")
+
+    updates = body.model_dump(exclude_unset=True)
+
+    title = updates.get("title", notice.title)
+    content = updates.get("content", notice.content)
+    if not title or not content:
+        raise AppError(400, "INVALID_INPUT", "제목과 내용을 입력해주세요")
+
+    notice.title = title
+    notice.content = sanitize_html(content)
+
+    db.commit()
+    db.refresh(notice)
+
+    return {"success": True, "data": {"id": notice.id}}
+
+
+@router.delete("/{notice_id}")
+def delete_notice(notice_id: int, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
+    notice = db.get(Notice, notice_id)
+    if notice is None:
+        raise AppError(404, "NOTICE_NOT_FOUND", "존재하지 않는 공지사항입니다")
+
+    db.delete(notice)
+    db.commit()
+
+    return {"success": True, "data": None}
