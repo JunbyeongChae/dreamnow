@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator
 from pydantic.alias_generators import to_camel
 
 from app.models import MenuCategory, MenuSubCategory, UserRole
@@ -8,13 +8,6 @@ from app.models import MenuCategory, MenuSubCategory, UserRole
 
 class CamelModel(BaseModel):
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True, from_attributes=True)
-
-
-def _check_menu_sub_category(category: MenuCategory, sub_category: MenuSubCategory | None) -> None:
-    if category == MenuCategory.beverage and sub_category is None:
-        raise ValueError("음료 카테고리는 하위 카테고리를 선택해주세요")
-    if category != MenuCategory.beverage and sub_category is not None:
-        raise ValueError("season/dessert 카테고리는 하위 카테고리를 가질 수 없습니다")
 
 
 # --- API-01. 회원가입 ---
@@ -52,6 +45,11 @@ class LoginResponse(CamelModel):
     user: LoginUser
 
 
+# --- 이미지 업로드 ---
+class UploadResponse(CamelModel):
+    image_url: str
+
+
 # --- API-03/04. 배너 ---
 class BannerResponse(CamelModel):
     id: int
@@ -66,6 +64,15 @@ class BannerCreateRequest(CamelModel):
     sort_order: int = 0
     start_at: datetime | None = None
     end_at: datetime | None = None
+
+
+class BannerUpdateRequest(CamelModel):
+    image_url: str | None = None
+    link_url: str | None = None
+    sort_order: int | None = None
+    start_at: datetime | None = None
+    end_at: datetime | None = None
+    is_active: bool | None = None
 
 
 class BannerCreateResponse(CamelModel):
@@ -86,21 +93,19 @@ class PopupCreateRequest(CamelModel):
     end_at: datetime | None = None
 
 
+class PopupUpdateRequest(CamelModel):
+    title: str | None = None
+    content: str | None = None
+    start_at: datetime | None = None
+    end_at: datetime | None = None
+    is_active: bool | None = None
+
+
 class PopupCreateResponse(CamelModel):
     id: int
 
 
 # --- API-05. 메뉴 목록 조회 ---
-class MenuListQuery(CamelModel):
-    category: MenuCategory
-    sub_category: MenuSubCategory | None = None
-
-    @model_validator(mode="after")
-    def validate_sub_category(self) -> "MenuListQuery":
-        _check_menu_sub_category(self.category, self.sub_category)
-        return self
-
-
 class MenuListItem(CamelModel):
     id: int
     name: str
@@ -120,17 +125,12 @@ class MenuDetailResponse(CamelModel):
 
 # --- API-07. 메뉴 등록 ---
 class MenuCreateRequest(CamelModel):
-    category: MenuCategory
-    sub_category: MenuSubCategory | None = None
+    category: str
+    sub_category: str | None = None
     name: str
     image_url: str
     price: int
     description: str | None = None
-
-    @model_validator(mode="after")
-    def validate_sub_category(self) -> "MenuCreateRequest":
-        _check_menu_sub_category(self.category, self.sub_category)
-        return self
 
 
 class MenuCreateResponse(CamelModel):
@@ -138,11 +138,6 @@ class MenuCreateResponse(CamelModel):
 
 
 # --- API-08. 공지사항 목록 조회 ---
-class NoticeListQuery(CamelModel):
-    page: int = 1
-    size: int = 10
-
-
 class NoticeListItem(CamelModel):
     id: int
     title: str
@@ -180,6 +175,14 @@ class InquiryCreateRequest(CamelModel):
 
 class InquiryCreateResponse(CamelModel):
     id: int
+
+
+# --- 상담글 목록 조회 (role별 분기) ---
+class InquiryListItem(CamelModel):
+    id: int
+    title: str
+    answered_at: datetime | None
+    created_at: datetime
 
 
 # --- API-10. 상담글 상세 조회 ---

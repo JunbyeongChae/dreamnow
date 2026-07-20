@@ -3,10 +3,11 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.database import SessionLocal
 from app.exceptions import register_exception_handlers
-from app.routers import auth
+from app.routers import auth, banners, inquiries, menus, notices, popups, uploads
 from app.seed import ensure_admin_user
 
 load_dotenv()
@@ -21,8 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "static")
+os.makedirs(STATIC_DIR, exist_ok=True)
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
 register_exception_handlers(app)
 app.include_router(auth.router)
+app.include_router(uploads.router)
+app.include_router(banners.router)
+app.include_router(popups.router)
+app.include_router(menus.router)
+app.include_router(notices.router)
+app.include_router(inquiries.router)
 
 
 @app.on_event("startup")
