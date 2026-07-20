@@ -1,4 +1,10 @@
-import type { InquiryAnswerRequest, InquiryCreateRequest, InquiryDetail, InquiryListItem } from "../types/inquiry";
+import type {
+  InquiryAnswerRequest,
+  InquiryCreateRequest,
+  InquiryDetail,
+  InquiryListItem,
+  InquiryUpdateRequest,
+} from "../types/inquiry";
 import { apiRequest } from "./client";
 
 export function createInquiry(body: InquiryCreateRequest) {
@@ -21,4 +27,22 @@ export function answerInquiry(id: number, body: InquiryAnswerRequest) {
     method: "POST",
     body: JSON.stringify(body),
   });
+}
+
+export function updateInquiryAnswer(id: number, body: InquiryAnswerRequest) {
+  return apiRequest<{ id: number; answeredAt: string }>(`/api/inquiries/${id}/answer`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function updateInquiry(id: number, body: InquiryUpdateRequest) {
+  return apiRequest<{ id: number }>(`/api/inquiries/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+  });
+}
+
+export function deleteInquiry(id: number) {
+  return apiRequest<null>(`/api/inquiries/${id}`, { method: "DELETE" });
 }

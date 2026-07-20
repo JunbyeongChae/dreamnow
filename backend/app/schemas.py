@@ -191,6 +191,11 @@ class InquiryCreateResponse(CamelModel):
     id: int
 
 
+class InquiryUpdateRequest(CamelModel):
+    title: str | None = None
+    content: str | None = None
+
+
 # --- 상담글 목록 조회 (role별 분기) ---
 class InquiryListItem(CamelModel):
     id: int
