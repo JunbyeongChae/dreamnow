@@ -182,6 +182,14 @@ class InquiryCreateResponse(CamelModel):
     id: int
 
 
+# --- 상담글 목록 조회 (role별 분기) ---
+class InquiryListItem(CamelModel):
+    id: int
+    title: str
+    answered_at: datetime | None
+    created_at: datetime
+
+
 # --- API-10. 상담글 상세 조회 ---
 class InquiryDetailResponse(CamelModel):
     id: int
