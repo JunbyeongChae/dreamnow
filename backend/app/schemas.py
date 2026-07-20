@@ -176,6 +176,11 @@ class NoticeCreateResponse(CamelModel):
     id: int
 
 
+class NoticeUpdateRequest(CamelModel):
+    title: str | None = None
+    content: str | None = None
+
+
 # --- API-09. 상담글 작성 ---
 class InquiryCreateRequest(CamelModel):
     title: str

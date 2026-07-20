@@ -22,3 +22,8 @@ export interface NoticeCreateRequest {
   title: string;
   content: string;
 }
+
+export interface NoticeUpdateRequest {
+  title: string;
+  content: string;
+}

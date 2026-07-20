@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import DOMPurify from "dompurify";
 
-import { getNotices, getNotice } from "../api/notices";
+import { getNotices, getNotice, deleteNotice } from "../api/notices";
 import { getInquiries, createInquiry } from "../api/inquiries";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useRequireAuth } from "../hooks/useRequireAuth";
@@ -28,6 +28,7 @@ function SupportPage() {
 
   const [tab, setTab] = useState<Tab>("notice");
   const [noticeId, setNoticeId] = useState<number | null>(null);
+  const [editingNotice, setEditingNotice] = useState(false);
   const [inquiryId, setInquiryId] = useState<number | null>(null);
   const [writing, setWriting] = useState(false);
   const [form, setForm] = useState({ title: "", content: "" });
@@ -48,6 +49,18 @@ function SupportPage() {
     enabled: tab === "inquiry" && !!user,
   });
 
+  const deleteNoticeMutation = useMutation({
+    mutationFn: deleteNotice,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notices"] });
+      setNoticeId(null);
+    },
+  });
+
+  const handleDeleteNotice = () => {
+    if (noticeId !== null && window.confirm("이 공지사항을 삭제할까요?")) deleteNoticeMutation.mutate(noticeId);
+  };
+
   const createMutation = useMutation({
     mutationFn: () => createInquiry(form),
     onSuccess: () => {
@@ -61,6 +74,7 @@ function SupportPage() {
     if (next === "inquiry" && !requireAuth()) return;
     setTab(next);
     setNoticeId(null);
+    setEditingNotice(false);
     setInquiryId(null);
     setWriting(false);
   };
@@ -104,18 +118,33 @@ function SupportPage() {
               <NoticeList notices={notices?.items ?? []} breakpoint={breakpoint} onSelect={setNoticeId} />
             </>
           ) : (
-            notice && (
+            notice &&
+            (editingNotice ? (
+              <NoticeForm notice={notice} onDone={() => setEditingNotice(false)} />
+            ) : (
               <div className="flex flex-col gap-4">
-                <button onClick={() => setNoticeId(null)} className="self-start text-sm text-accent">
-                  ← 목록으로
-                </button>
+                <div className="flex items-center justify-between">
+                  <button onClick={() => setNoticeId(null)} className="text-sm text-accent">
+                    ← 목록으로
+                  </button>
+                  {isAdmin && (
+                    <div className="flex gap-3">
+                      <button onClick={() => setEditingNotice(true)} className="text-sm font-bold text-accent">
+                        수정
+                      </button>
+                      <button onClick={handleDeleteNotice} className="text-sm font-bold text-red-500">
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
                 <h1 className="font-display text-xl text-primary">{notice.title}</h1>
                 <div
                   className="text-sm text-primary"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(notice.content) }}
                 />
               </div>
-            )
+            ))
           ))}
 
         {tab === "inquiry" &&
