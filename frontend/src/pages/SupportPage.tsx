@@ -189,7 +189,7 @@ function SupportPage() {
               <button onClick={() => setInquiryId(null)} className="self-start text-sm text-accent">
                 ← 목록으로
               </button>
-              <InquiryDetail id={inquiryId} />
+              <InquiryDetail id={inquiryId} onDeleted={() => setInquiryId(null)} />
             </div>
           ))}
       </div>
