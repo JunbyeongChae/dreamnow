@@ -137,6 +137,15 @@ class MenuCreateResponse(CamelModel):
     id: int
 
 
+class MenuUpdateRequest(CamelModel):
+    category: str | None = None
+    sub_category: str | None = None
+    name: str | None = None
+    image_url: str | None = None
+    price: int | None = None
+    description: str | None = None
+
+
 # --- API-08. 공지사항 목록 조회 ---
 class NoticeListItem(CamelModel):
     id: int
