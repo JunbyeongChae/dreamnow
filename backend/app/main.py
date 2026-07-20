@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.database import SessionLocal
 from app.exceptions import register_exception_handlers
-from app.routers import auth, banners, uploads
+from app.routers import auth, banners, popups, uploads
 from app.seed import ensure_admin_user
 
 load_dotenv()
@@ -30,6 +30,7 @@ register_exception_handlers(app)
 app.include_router(auth.router)
 app.include_router(uploads.router)
 app.include_router(banners.router)
+app.include_router(popups.router)
 
 
 @app.on_event("startup")

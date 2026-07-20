@@ -100,6 +100,14 @@ class PopupCreateRequest(CamelModel):
     end_at: datetime | None = None
 
 
+class PopupUpdateRequest(CamelModel):
+    title: str | None = None
+    content: str | None = None
+    start_at: datetime | None = None
+    end_at: datetime | None = None
+    is_active: bool | None = None
+
+
 class PopupCreateResponse(CamelModel):
     id: int
 
