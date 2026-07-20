@@ -14,6 +14,7 @@ from app.schemas import (
     InquiryCreateResponse,
     InquiryDetailResponse,
     InquiryListItem,
+    InquiryUpdateRequest,
 )
 
 router = APIRouter(prefix="/api/inquiries", tags=["inquiries"])
@@ -55,6 +56,56 @@ def get_inquiry(inquiry_id: int, db: Session = Depends(get_db), user: User = Dep
     return {"success": True, "data": InquiryDetailResponse.model_validate(inquiry).model_dump(by_alias=True)}
 
 
+@router.patch("/{inquiry_id}")
+def update_inquiry(
+    inquiry_id: int,
+    body: InquiryUpdateRequest,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_auth),
+):
+    inquiry = db.get(Inquiry, inquiry_id)
+    if inquiry is None:
+        raise AppError(404, "INQUIRY_NOT_FOUND", "존재하지 않는 상담글입니다")
+
+    if inquiry.user_id != user.id:
+        raise AppError(403, "FORBIDDEN", "본인 상담글만 수정할 수 있습니다")
+
+    if inquiry.answered_at is not None:
+        raise AppError(400, "ALREADY_ANSWERED", "답변이 완료된 문의는 수정할 수 없습니다")
+
+    updates = body.model_dump(exclude_unset=True)
+    title = updates.get("title", inquiry.title)
+    content = updates.get("content", inquiry.content)
+    if not title or not content:
+        raise AppError(400, "INVALID_INPUT", "제목과 내용을 입력해주세요")
+
+    inquiry.title = title
+    inquiry.content = content
+
+    db.commit()
+    db.refresh(inquiry)
+
+    return {"success": True, "data": {"id": inquiry.id}}
+
+
+@router.delete("/{inquiry_id}")
+def delete_inquiry(inquiry_id: int, db: Session = Depends(get_db), user: User = Depends(require_auth)):
+    inquiry = db.get(Inquiry, inquiry_id)
+    if inquiry is None:
+        raise AppError(404, "INQUIRY_NOT_FOUND", "존재하지 않는 상담글입니다")
+
+    if inquiry.user_id != user.id:
+        raise AppError(403, "FORBIDDEN", "본인 상담글만 삭제할 수 있습니다")
+
+    if inquiry.answered_at is not None:
+        raise AppError(400, "ALREADY_ANSWERED", "답변이 완료된 문의는 삭제할 수 없습니다")
+
+    db.delete(inquiry)
+    db.commit()
+
+    return {"success": True, "data": None}
+
+
 @router.post("/{inquiry_id}/answer")
 def answer_inquiry(
     inquiry_id: int,
@@ -71,6 +122,30 @@ def answer_inquiry(
 
     inquiry.answer_content = body.answer_content
     inquiry.answered_at = datetime.utcnow()
+    db.commit()
+    db.refresh(inquiry)
+
+    return {"success": True, "data": InquiryAnswerResponse.model_validate(inquiry).model_dump(by_alias=True)}
+
+
+@router.patch("/{inquiry_id}/answer")
+def update_inquiry_answer(
+    inquiry_id: int,
+    body: InquiryAnswerRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    inquiry = db.get(Inquiry, inquiry_id)
+    if inquiry is None:
+        raise AppError(404, "INQUIRY_NOT_FOUND", "존재하지 않는 상담글입니다")
+
+    if inquiry.answered_at is None:
+        raise AppError(400, "NOT_ANSWERED_YET", "아직 답변이 등록되지 않았습니다")
+
+    if not body.answer_content:
+        raise AppError(400, "INVALID_INPUT", "답변 내용을 입력해주세요")
+
+    inquiry.answer_content = body.answer_content
     db.commit()
     db.refresh(inquiry)
 
