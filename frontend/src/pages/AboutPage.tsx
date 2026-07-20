@@ -20,7 +20,7 @@ function AboutPage() {
       <section className="bg-bg-warm px-4 py-10 md:px-8 lg:py-20">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-8 lg:flex-row lg:items-center">
           <ImageSlot
-            src={null}
+            src="/img/about.png"
             alt="배익거리 매장 전경"
             className="h-[200px] w-full flex-shrink-0 md:h-[260px] lg:h-[420px] lg:w-1/2"
           />
