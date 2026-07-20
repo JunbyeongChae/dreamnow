@@ -88,7 +88,9 @@ function BannerForm() {
             <button
               type="button"
               className="text-xs font-bold text-red-500"
-              onClick={() => deleteMutation.mutate(banner.id)}
+              onClick={() => {
+                if (window.confirm("이 배너를 삭제할까요?")) deleteMutation.mutate(banner.id);
+              }}
             >
               삭제
             </button>

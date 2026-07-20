@@ -77,7 +77,9 @@ function PopupForm() {
             <button
               type="button"
               className="text-xs font-bold text-red-500"
-              onClick={() => deleteMutation.mutate(popup.id)}
+              onClick={() => {
+                if (window.confirm("이 팝업을 삭제할까요?")) deleteMutation.mutate(popup.id);
+              }}
             >
               삭제
             </button>
