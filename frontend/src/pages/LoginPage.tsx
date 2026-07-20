@@ -29,10 +29,10 @@ function LoginPage() {
   };
 
   return (
-    <div className="flex justify-center px-4 py-12 md:py-20">
+    <div className="flex justify-center bg-bg-warm px-4 py-12 md:py-20">
       <form
         onSubmit={handleSubmit}
-        className="flex w-full flex-col gap-4 border border-border-warm px-6 py-10 md:w-[400px] md:px-10 md:py-12"
+        className="flex w-full flex-col gap-4 px-6 py-10 md:w-[400px] md:border md:border-border-warm md:bg-white md:px-10 md:py-12"
       >
         <h1 className="mb-2 text-center font-display text-2xl text-primary">로그인</h1>
 
