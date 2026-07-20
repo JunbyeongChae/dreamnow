@@ -25,3 +25,12 @@ export interface MenuCreateRequest {
   price: number;
   description?: string;
 }
+
+export interface MenuUpdateRequest {
+  category: MenuCategory;
+  subCategory: MenuSubCategory | null;
+  name: string;
+  imageUrl: string;
+  price: number;
+  description?: string;
+}
