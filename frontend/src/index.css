@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  margin: 0;
+@layer base {
+  body {
+    margin: 0;
+    @apply font-sans text-primary;
+  }
 }

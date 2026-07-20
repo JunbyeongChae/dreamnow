@@ -4,6 +4,10 @@ export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["'Noto Sans KR'", "sans-serif"],
+        display: ["'Black Han Sans'", "sans-serif"],
+      },
       colors: {
         primary: "#2b2620",
         accent: "#c8963e",
