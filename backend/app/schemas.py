@@ -73,6 +73,15 @@ class BannerCreateRequest(CamelModel):
     end_at: datetime | None = None
 
 
+class BannerUpdateRequest(CamelModel):
+    image_url: str | None = None
+    link_url: str | None = None
+    sort_order: int | None = None
+    start_at: datetime | None = None
+    end_at: datetime | None = None
+    is_active: bool | None = None
+
+
 class BannerCreateResponse(CamelModel):
     id: int
 
