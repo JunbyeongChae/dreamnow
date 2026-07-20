@@ -24,7 +24,7 @@ interface ApiErrorResponse {
 export async function apiRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = useAuthStore.getState().token;
   const headers: Record<string, string> = { ...(options.headers as Record<string, string>) };
-  if (options.body) {
+  if (options.body && !(options.body instanceof FormData)) {
     headers["Content-Type"] = "application/json";
   }
   if (token) {
