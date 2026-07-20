@@ -29,7 +29,10 @@ function MenuPage() {
   const subCategoryLabel = SUB_CATEGORIES.find((s) => s.value === subCategory)?.label;
 
   const handleSelectCategory = (next: MenuCategory) => setCategory(next);
-  const handleSelectSubCategory = (next: MenuSubCategory) => setSubCategory(next);
+  const handleSelectSubCategory = (next: MenuSubCategory) => {
+    setCategory("beverage");
+    setSubCategory(next);
+  };
 
   return (
     <div className="px-4 py-8 md:px-8">

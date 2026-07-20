@@ -16,7 +16,7 @@ function CategorySidebar({ selection, onSelectCategory, onSelectSubCategory }: C
               {cat.label}
             </button>
 
-            {cat.value === "beverage" && selection.category === "beverage" && (
+            {cat.value === "beverage" && (
               <ul className="ml-4 flex flex-col gap-1">
                 {SUB_CATEGORIES.map((sub) => (
                   <li key={sub.value}>
