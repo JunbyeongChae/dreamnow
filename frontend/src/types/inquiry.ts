@@ -20,6 +20,11 @@ export interface InquiryCreateRequest {
   content: string;
 }
 
+export interface InquiryUpdateRequest {
+  title: string;
+  content: string;
+}
+
 export interface InquiryAnswerRequest {
   answerContent: string;
 }
