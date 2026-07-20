@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { getMenus } from "../api/menus";
-import type { MenuCategory, MenuSubCategory } from "../types/menu";
+import { deleteMenu, getMenu, getMenus } from "../api/menus";
+import type { MenuCategory, MenuDetail, MenuSubCategory } from "../types/menu";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { useAuthStore } from "../store/authStore";
 import CategorySidebar from "../components/menu/CategorySidebar";
@@ -17,6 +17,22 @@ function MenuPage() {
   const showAdminForm = user?.role === "admin" && isAdminMode;
   const [category, setCategory] = useState<MenuCategory>("season");
   const [subCategory, setSubCategory] = useState<MenuSubCategory>("coffee");
+  const [editingMenu, setEditingMenu] = useState<MenuDetail | null>(null);
+
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: deleteMenu,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["menus"] }),
+  });
+
+  const handleEdit = async (menuId: number) => {
+    const detail = await getMenu(menuId);
+    setEditingMenu(detail);
+  };
+
+  const handleDelete = (menuId: number) => {
+    if (window.confirm("이 메뉴를 삭제할까요?")) deleteMutation.mutate(menuId);
+  };
 
   const selection = { category, subCategory: category === "beverage" ? subCategory : null };
 
@@ -56,7 +72,11 @@ function MenuPage() {
         <div className="flex-1">
           {showAdminForm && (
             <div className="mb-6">
-              <MenuForm />
+              <MenuForm
+                key={editingMenu?.id ?? "create"}
+                menu={editingMenu ?? undefined}
+                onDone={() => setEditingMenu(null)}
+              />
             </div>
           )}
 
@@ -73,7 +93,12 @@ function MenuPage() {
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {menus?.map((menu) => (
-              <MenuCard key={menu.id} menu={menu} />
+              <MenuCard
+                key={menu.id}
+                menu={menu}
+                onEdit={showAdminForm ? () => handleEdit(menu.id) : undefined}
+                onDelete={showAdminForm ? () => handleDelete(menu.id) : undefined}
+              />
             ))}
           </div>
         </div>
