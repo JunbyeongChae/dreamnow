@@ -1,3 +1,4 @@
+import bleach
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
@@ -8,6 +9,16 @@ from app.models import Notice, User
 from app.schemas import NoticeCreateRequest, NoticeCreateResponse, NoticeDetailResponse, NoticeListItem, NoticeListResponse
 
 router = APIRouter(prefix="/api/notices", tags=["notices"])
+
+ALLOWED_TAGS = [
+    "p", "br", "strong", "em", "b", "i", "u", "s", "blockquote", "code", "pre",
+    "h1", "h2", "h3", "ul", "ol", "li", "a",
+]
+ALLOWED_ATTRIBUTES = {"a": ["href", "target", "rel"]}
+
+
+def sanitize_html(content: str) -> str:
+    return bleach.clean(content, tags=ALLOWED_TAGS, attributes=ALLOWED_ATTRIBUTES, strip=True)
 
 
 @router.get("")
@@ -43,7 +54,7 @@ def create_notice(body: NoticeCreateRequest, db: Session = Depends(get_db), admi
     if not body.title or not body.content:
         raise AppError(400, "INVALID_INPUT", "제목과 내용을 입력해주세요")
 
-    notice = Notice(title=body.title, content=body.content)
+    notice = Notice(title=body.title, content=sanitize_html(body.content))
     db.add(notice)
     db.commit()
     db.refresh(notice)
