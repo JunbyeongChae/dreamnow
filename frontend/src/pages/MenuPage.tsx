@@ -4,13 +4,17 @@ import { useQuery } from "@tanstack/react-query";
 import { getMenus } from "../api/menus";
 import type { MenuCategory, MenuSubCategory } from "../types/menu";
 import { useBreakpoint } from "../hooks/useBreakpoint";
+import { useAuthStore } from "../store/authStore";
 import CategorySidebar from "../components/menu/CategorySidebar";
 import CategoryTabBar from "../components/menu/CategoryTabBar";
 import MenuCard from "../components/menu/MenuCard";
 import { CATEGORIES, SUB_CATEGORIES } from "../components/menu/categoryData";
+import MenuForm from "../components/admin/MenuForm";
 
 function MenuPage() {
   const breakpoint = useBreakpoint();
+  const { user, isAdminMode } = useAuthStore();
+  const showAdminForm = user?.role === "admin" && isAdminMode;
   const [category, setCategory] = useState<MenuCategory>("season");
   const [subCategory, setSubCategory] = useState<MenuSubCategory>("coffee");
 
@@ -47,6 +51,12 @@ function MenuPage() {
         )}
 
         <div className="flex-1">
+          {showAdminForm && (
+            <div className="mb-6">
+              <MenuForm />
+            </div>
+          )}
+
           {breakpoint === "desktop" && (
             <h2 className="mb-4 text-lg font-black text-primary">
               {categoryLabel}
