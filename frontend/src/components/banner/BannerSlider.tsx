@@ -11,7 +11,7 @@ import Button from "../common/Button";
 const AUTOPLAY_INTERVAL_MS = 5000;
 
 function resolveImageUrl(src: string): string {
-  return src.startsWith("/") ? `${API_BASE_URL}${src}` : src;
+  return src.startsWith("/static/") ? `${API_BASE_URL}${src}` : src;
 }
 
 function BannerSlider() {

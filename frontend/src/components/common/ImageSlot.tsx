@@ -10,7 +10,7 @@ interface ImageSlotProps {
 }
 
 function resolveImageUrl(src: string): string {
-  return src.startsWith("/") ? `${API_BASE_URL}${src}` : src;
+  return src.startsWith("/static/") ? `${API_BASE_URL}${src}` : src;
 }
 
 function ImageSlot({ src, alt, className = "" }: ImageSlotProps) {
