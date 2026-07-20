@@ -5,7 +5,7 @@ from app.auth import require_admin
 from app.database import get_db
 from app.exceptions import AppError
 from app.models import Menu, MenuCategory, MenuSubCategory, User
-from app.schemas import MenuCreateRequest, MenuCreateResponse, MenuDetailResponse, MenuListItem
+from app.schemas import MenuCreateRequest, MenuCreateResponse, MenuDetailResponse, MenuListItem, MenuUpdateRequest
 
 router = APIRouter(prefix="/api/menus", tags=["menus"])
 
@@ -24,6 +24,14 @@ def _parse_sub_category(sub_category: str | None) -> MenuSubCategory:
         return MenuSubCategory(sub_category)
     except ValueError:
         raise AppError(400, "INVALID_SUB_CATEGORY", "음료 카테고리는 하위 카테고리를 선택해주세요")
+
+
+def _validate_category_sub_category(category: MenuCategory, sub_category: str | None) -> MenuSubCategory | None:
+    if category == MenuCategory.beverage:
+        return _parse_sub_category(sub_category)
+    if sub_category is not None:
+        raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
+    return None
 
 
 @router.get("")
@@ -60,16 +68,7 @@ def create_menu(body: MenuCreateRequest, db: Session = Depends(get_db), admin: U
     except ValueError:
         raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
 
-    sub_category_enum: MenuSubCategory | None = None
-    if category_enum == MenuCategory.beverage:
-        if body.sub_category is None:
-            raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
-        try:
-            sub_category_enum = MenuSubCategory(body.sub_category)
-        except ValueError:
-            raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
-    elif body.sub_category is not None:
-        raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
+    sub_category_enum = _validate_category_sub_category(category_enum, body.sub_category)
 
     if not body.name or body.price is None:
         raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
@@ -87,3 +86,54 @@ def create_menu(body: MenuCreateRequest, db: Session = Depends(get_db), admin: U
     db.refresh(menu)
 
     return {"success": True, "data": MenuCreateResponse.model_validate(menu).model_dump(by_alias=True)}
+
+
+@router.patch("/{menu_id}")
+def update_menu(
+    menu_id: int,
+    body: MenuUpdateRequest,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    menu = db.get(Menu, menu_id)
+    if menu is None:
+        raise AppError(404, "MENU_NOT_FOUND", "존재하지 않는 메뉴입니다")
+
+    updates = body.model_dump(exclude_unset=True)
+
+    category_value = updates.get("category", menu.category.value)
+    sub_category_value = updates.get("sub_category", menu.sub_category.value if menu.sub_category else None)
+
+    category_enum = _parse_category(category_value)
+    sub_category_enum = _validate_category_sub_category(category_enum, sub_category_value)
+
+    name = updates.get("name", menu.name)
+    price = updates.get("price", menu.price)
+    if not name or price is None:
+        raise AppError(400, "INVALID_INPUT", "카테고리, 이름, 가격을 확인해주세요")
+
+    menu.category = category_enum
+    menu.sub_category = sub_category_enum
+    menu.name = name
+    menu.price = price
+    if "image_url" in updates:
+        menu.image_url = updates["image_url"]
+    if "description" in updates:
+        menu.description = updates["description"]
+
+    db.commit()
+    db.refresh(menu)
+
+    return {"success": True, "data": {"id": menu.id}}
+
+
+@router.delete("/{menu_id}")
+def delete_menu(menu_id: int, db: Session = Depends(get_db), admin: User = Depends(require_admin)):
+    menu = db.get(Menu, menu_id)
+    if menu is None:
+        raise AppError(404, "MENU_NOT_FOUND", "존재하지 않는 메뉴입니다")
+
+    db.delete(menu)
+    db.commit()
+
+    return {"success": True, "data": None}

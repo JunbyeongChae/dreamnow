@@ -2,8 +2,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { createMenu } from "../../api/menus";
-import type { MenuCategory, MenuSubCategory } from "../../types/menu";
+import { createMenu, updateMenu } from "../../api/menus";
+import type { MenuCategory, MenuDetail, MenuSubCategory } from "../../types/menu";
 import { CATEGORIES, SUB_CATEGORIES } from "../menu/categoryData";
 import Button from "../common/Button";
 import FormInput from "../common/FormInput";
@@ -18,11 +18,29 @@ const EMPTY_FORM = {
   description: "",
 };
 
-function MenuForm() {
-  const queryClient = useQueryClient();
-  const [form, setForm] = useState(EMPTY_FORM);
+interface MenuFormProps {
+  menu?: MenuDetail;
+  onDone?: () => void;
+}
 
-  const mutation = useMutation({
+function MenuForm({ menu, onDone }: MenuFormProps) {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState(() =>
+    menu
+      ? {
+          category: menu.category,
+          subCategory: menu.subCategory ?? "coffee",
+          name: menu.name,
+          imageUrl: menu.imageUrl,
+          price: String(menu.price),
+          description: menu.description ?? "",
+        }
+      : EMPTY_FORM,
+  );
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["menus"] });
+
+  const createMutation = useMutation({
     mutationFn: () =>
       createMenu({
         category: form.category,
@@ -33,19 +51,41 @@ function MenuForm() {
         description: form.description || undefined,
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["menus"] });
+      invalidate();
       setForm(EMPTY_FORM);
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: () =>
+      updateMenu(menu!.id, {
+        category: form.category,
+        subCategory: form.category === "beverage" ? form.subCategory : null,
+        name: form.name,
+        imageUrl: form.imageUrl,
+        price: Number(form.price),
+        description: form.description || undefined,
+      }),
+    onSuccess: () => {
+      invalidate();
+      onDone?.();
     },
   });
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
-    mutation.mutate();
+    if (menu) {
+      updateMutation.mutate();
+    } else {
+      createMutation.mutate();
+    }
   };
+
+  const isPending = createMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="border border-border-warm bg-white p-4">
-      <h3 className="mb-3 font-display text-lg text-primary">메뉴 등록</h3>
+      <h3 className="mb-3 font-display text-lg text-primary">{menu ? "메뉴 수정" : "메뉴 등록"}</h3>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-3">
         <div className="flex flex-col gap-1">
@@ -108,13 +148,16 @@ function MenuForm() {
           onChange={(url) => setForm((f) => ({ ...f, imageUrl: url }))}
         />
 
-        <Button
-          type="submit"
-          variant="accent"
-          disabled={!form.imageUrl || !form.name || !form.price || mutation.isPending}
-        >
-          {mutation.isPending ? "등록 중..." : "메뉴 등록"}
-        </Button>
+        <div className="flex gap-2">
+          <Button type="submit" variant="accent" disabled={!form.imageUrl || !form.name || !form.price || isPending}>
+            {isPending ? "저장 중..." : menu ? "수정 저장" : "메뉴 등록"}
+          </Button>
+          {menu && (
+            <Button type="button" variant="outline" onClick={onDone}>
+              취소
+            </Button>
+          )}
+        </div>
       </form>
     </div>
   );
