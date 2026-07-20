@@ -23,6 +23,7 @@ Thumbs.db
 
 # CLAUDE
 CLAUDE.md
+.claude/
 
 # docs
 docs/TASKS.md
