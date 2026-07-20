@@ -138,11 +138,6 @@ class MenuCreateResponse(CamelModel):
 
 
 # --- API-08. 공지사항 목록 조회 ---
-class NoticeListQuery(CamelModel):
-    page: int = 1
-    size: int = 10
-
-
 class NoticeListItem(CamelModel):
     id: int
     title: str

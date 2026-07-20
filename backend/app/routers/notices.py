@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api/notices", tags=["notices"])
 
 @router.get("")
 def list_notices(page: int = Query(1), size: int = Query(10), db: Session = Depends(get_db)):
-    if page < 1 or size < 1:
+    if page < 1 or size < 1 or size > 100:
         raise AppError(400, "INVALID_QUERY", "잘못된 페이지 값입니다")
 
     total = db.query(Notice).count()
