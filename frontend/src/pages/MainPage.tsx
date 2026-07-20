@@ -4,10 +4,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getNotices } from "../api/notices";
 import { useBreakpoint } from "../hooks/useBreakpoint";
+import { useAuthStore } from "../store/authStore";
 import BannerSlider from "../components/banner/BannerSlider";
 import PopupModal from "../components/popup/PopupModal";
 import QuickLinkCard from "../components/common/QuickLinkCard";
 import SectionHeader from "../components/common/SectionHeader";
+import BannerForm from "../components/admin/BannerForm";
+import PopupForm from "../components/admin/PopupForm";
 
 const QUICK_LINKS = [
   { icon: Building2, title: "기업소개", description: "배익거리의 브랜드 스토리를 만나보세요", to: "/about" },
@@ -18,6 +21,8 @@ const QUICK_LINKS = [
 function MainPage() {
   const breakpoint = useBreakpoint();
   const variant = breakpoint === "desktop" ? "full" : "compact";
+  const { user, isAdminMode } = useAuthStore();
+  const showAdminForms = user?.role === "admin" && isAdminMode;
 
   const { data: notices } = useQuery({
     queryKey: ["notices", "preview"],
@@ -28,6 +33,13 @@ function MainPage() {
     <div>
       <PopupModal />
       <BannerSlider />
+
+      {showAdminForms && (
+        <section className="flex flex-col gap-4 px-4 py-6 md:px-8">
+          <BannerForm />
+          <PopupForm />
+        </section>
+      )}
 
       <section className="bg-bg-warm px-4 py-10 md:px-8">
         <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
