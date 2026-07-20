@@ -1,9 +1,9 @@
+import { RouterProvider } from 'react-router-dom'
+
+import { router } from './router'
+
 function App() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-bg-warm text-primary">
-      <p>배익거리</p>
-    </div>
-  )
+  return <RouterProvider router={router} />
 }
 
 export default App
