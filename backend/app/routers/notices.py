@@ -7,6 +7,8 @@ from app.database import get_db
 from app.exceptions import AppError
 from app.models import Notice, User
 from app.schemas import (
+    AiDraftRequest,
+    AiDraftResponse,
     NoticeCreateRequest,
     NoticeCreateResponse,
     NoticeDetailResponse,
@@ -14,6 +16,7 @@ from app.schemas import (
     NoticeListResponse,
     NoticeUpdateRequest,
 )
+from app.services.ai_service import generate_notice_draft
 
 router = APIRouter(prefix="/api/notices", tags=["notices"])
 
@@ -67,6 +70,16 @@ def create_notice(body: NoticeCreateRequest, db: Session = Depends(get_db), admi
     db.refresh(notice)
 
     return {"success": True, "data": NoticeCreateResponse.model_validate(notice).model_dump(by_alias=True)}
+
+
+@router.post("/ai-draft")
+def create_ai_draft(body: AiDraftRequest, admin: User = Depends(require_admin)):
+    if not body.title:
+        raise AppError(400, "INVALID_INPUT", "제목을 입력해주세요")
+
+    content = generate_notice_draft(body.title)
+
+    return {"success": True, "data": AiDraftResponse(content=content).model_dump(by_alias=True)}
 
 
 @router.patch("/{notice_id}")

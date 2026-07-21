@@ -43,6 +43,7 @@ class User(Base):
     created_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     inquiries: Mapped[list["Inquiry"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
 
 class Banner(Base):
@@ -90,6 +91,8 @@ class Notice(Base):
     created_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now(), index=True)
     updated_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
 
+    comments: Mapped[list["Comment"]] = relationship(back_populates="notice", cascade="all, delete-orphan")
+
 
 class Inquiry(Base):
     __tablename__ = "inquiries"
@@ -103,3 +106,17 @@ class Inquiry(Base):
     created_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="inquiries")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    notice_id: Mapped[int] = mapped_column(ForeignKey("notices.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now(), index=True)
+    updated_at: Mapped["DateTime"] = mapped_column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
+
+    notice: Mapped["Notice"] = relationship(back_populates="comments")
+    user: Mapped["User"] = relationship(back_populates="comments")
