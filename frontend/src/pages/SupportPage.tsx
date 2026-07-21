@@ -11,6 +11,7 @@ import { useAuthStore } from "../store/authStore";
 import NoticeList from "../components/support/NoticeList";
 import InquiryList from "../components/support/InquiryList";
 import InquiryDetail from "../components/support/InquiryDetail";
+import CommentList from "../components/support/CommentList";
 import NoticeForm from "../components/admin/NoticeForm";
 import Button from "../components/common/Button";
 import FormInput from "../components/common/FormInput";
@@ -143,6 +144,7 @@ function SupportPage() {
                   className="text-sm text-primary"
                   dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(notice.content) }}
                 />
+                <CommentList noticeId={notice.id} />
               </div>
             ))
           ))}
