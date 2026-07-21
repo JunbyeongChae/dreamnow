@@ -10,4 +10,4 @@ python-multipart==0.0.32
 pydantic==2.13.4
 python-dotenv==1.2.2
 bleach==6.4.0
-google-generativeai==0.8.6
+google-genai==2.12.1

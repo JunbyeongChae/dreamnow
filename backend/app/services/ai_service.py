@@ -1,7 +1,7 @@
 import os
 
-import google.generativeai as genai
 from dotenv import load_dotenv
+from google import genai
 
 from app.exceptions import AppError
 
@@ -15,8 +15,7 @@ def generate_notice_draft(title: str) -> str:
     if not GEMINI_API_KEY:
         raise AppError(502, "AI_SERVICE_ERROR", "AI 초안 생성 기능을 사용할 수 없습니다")
 
-    genai.configure(api_key=GEMINI_API_KEY)
-    model = genai.GenerativeModel(GEMINI_MODEL)
+    client = genai.Client(api_key=GEMINI_API_KEY)
 
     prompt = (
         "너는 베이커리카페 '배익거리'의 공지사항 작성을 돕는 어시스턴트야. "
@@ -26,7 +25,7 @@ def generate_notice_draft(title: str) -> str:
     )
 
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
     except Exception as error:
         raise AppError(502, "AI_SERVICE_ERROR", "AI 초안 생성에 실패했습니다") from error
 
