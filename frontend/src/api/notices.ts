@@ -27,3 +27,10 @@ export function updateNotice(id: number, body: NoticeUpdateRequest) {
 export function deleteNotice(id: number) {
   return apiRequest<null>(`/api/notices/${id}`, { method: "DELETE" });
 }
+
+export function generateAiDraft(title: string) {
+  return apiRequest<{ content: string }>("/api/notices/ai-draft", {
+    method: "POST",
+    body: JSON.stringify({ title }),
+  });
+}
