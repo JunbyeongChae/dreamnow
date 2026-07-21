@@ -223,3 +223,31 @@ class InquiryAnswerRequest(CamelModel):
 class InquiryAnswerResponse(CamelModel):
     id: int
     answered_at: datetime
+
+
+# --- 공지사항 댓글 ---
+class CommentCreateRequest(CamelModel):
+    content: str
+
+
+class CommentUpdateRequest(CamelModel):
+    content: str
+
+
+class CommentResponse(CamelModel):
+    id: int
+    notice_id: int
+    user_id: int
+    username: str
+    content: str
+    created_at: datetime
+    updated_at: datetime
+
+
+# --- 공지사항 AI 초안 생성 ---
+class AiDraftRequest(CamelModel):
+    title: str
+
+
+class AiDraftResponse(CamelModel):
+    content: str
