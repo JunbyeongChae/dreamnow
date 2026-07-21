@@ -8,7 +8,7 @@ from app.exceptions import AppError
 load_dotenv()
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-flash-latest"
 
 
 def generate_notice_draft(title: str) -> str:
